@@ -41,7 +41,7 @@ function start() {
             name: "item_id",
             type: "input",
             message: "What is the ID of the product you want to buy?",
-            validate: function(value) {
+            validate: function (value) {
                 if (isNaN(value) === false) {
                     return true;
                 } else {
@@ -50,31 +50,41 @@ function start() {
                 }
             }
         }, {
-            name: 'stock_quantity',
-            message: 'How many units would you like to buy?',
-            type: 'input',
-            validate: function(value) {
-                if (isNaN(value) === false) {
-                    return true;
-                } else {
-                    console.log('\nPlease enter a valid quantity.');
-                    return false;
+                name: 'stock_quantity',
+                message: 'How many units would you like to buy?',
+                type: 'input',
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    } else {
+                        console.log('\nPlease enter a valid quantity.');
+                        return false;
+                    }
                 }
-            }
 
-        })
-        .then(function (answer) {
-            var query = "SELECT * FROM bamazon.products WHERE ?";
-            connection.query(query, { artist: answer.artist }, function (err, res) {
-                postAuction();
-            }
-        else {
-                    bidAuction();
+
+            }).then(function (answer) {
+                return new Promise(function (resolve, reject) {
+                    // query for all items in products table where the item_id is what was chosen
+                    connection.query("SELECT * FROM products WHERE item_id=?", answer.item_id, function (err, res) {
+                        if (err) reject(err);
+                        resolve(res);
+                    });
+
+                }).then(function (result) {
+                    // if there aren't enough of the item
+                    if (answer.stock_quantity > result[0].stock_quantity) {
+                        console.log ("Insufficient quantity!");
+                        // if there are enough
+                    } else {
+                        var object = {};
+                        // answer is the users responses to the prompts
+                        object.answer = answer;
+                        // result is the results of the query
+                        object.result = result;
+                        return object;
+                    }
                 })
-        });
+            })
+                
 
-
-
-}
-
-connection.end();
