@@ -27,7 +27,8 @@ function afterConnection() {
         if (err) throw err;
 
         for (var i = 0; i < data.length; i++) {
-            console.log("ID: " + data[i].item_id + " || Product Name: " + data[i].product_name, + " || Department: " + data[i].department_name + " || Price: " + data[i].price + " || Stock: " + data[i].stock_quantity);
+            console.log("ID: " + data[i].item_id + " || Product Name: " + data[i].product_name + " || Department: " + data[i].department_name + " || Price: " + data[i].price + " || Stock: " + data[i].stock_quantity);
+    
         }
         
     });
@@ -50,6 +51,7 @@ var run = function() {
                         choiceArray.push(results[i].product_name);
                     }
                     return choiceArray;
+                    console.log("\n\n");
                 },
                 message: "What product would you like to purchase?"
             },
@@ -94,7 +96,7 @@ var run = function() {
                 console.log("==============================================");
                 console.log("Pick a new quantity, not enough in stock");
                 console.log("==============================================");
-                afterConnection()
+                // afterConnection()
                 run();
             }
         });
