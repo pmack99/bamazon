@@ -29,92 +29,90 @@ function afterConnection() {
         for (var i = 0; i < data.length; i++) {
             console.log("ID: " + data[i].item_id + " || Product Name: " + data[i].product_name, + " || Department: " + data[i].department_name + " || Price: " + data[i].price + " || Stock: " + data[i].stock_quantity);
         }
-        action();
+        
     });
 }
 
 // everything above this line works!
 
-
-
-// function which prompts the user for what action they should take
-function action() {
-    inquirer
-        .prompt([{
-            name: "item_id",
-            type: "input",
-            message: "What is the ID of the product you want to buy?",
-            validate: function (value) {
-                if (isNaN(value) === false) {
-                    return true;
-                } else {
-                    console.log('\nPlease enter a valid ID.');
-                    return false;
-                }
-            }
-        }, {
-                name: "quantity",
-                message: "How many units would you like to buy?",
-                type: 'input',
-                validate: function (value) {
-                    if (isNaN(value) === false) {
-                        return true;
-                    } else {
-                        console.log('\nPlease enter a valid quantity.');
-                        return false;
+var run = function() {
+    // query the database for all products available for purchase
+    connection.query("SELECT * FROM products", function(err, results) {
+        if (err) throw err;
+        // once you have the products, prompt the user for which they'd like to purchase
+        inquirer.prompt([
+            {
+                name: "product",
+                type: "list",
+                choices: function() {
+                    var choiceArray = [];
+                    for (var i = 0; i < results.length; i++) {
+                        choiceArray.push(results[i].product_name);
                     }
-                }
-            
-
-                .then(function(purchase) {
-                    let item = purchase.item_id
-                    let quantity = purchase.quantity
-        
-                    let queryStr = 'SELECT * FROM products WHERE ?';
-        
-                    connection.query(queryStr, { item_id: item }, function(err, res) {
-                        if (err) throw err
-        
-                        if (res.length === 0) {
-                            console.log("ERROR: Invalid Item ID. Please select a valid Item ID.")
-                            displayInventory()
-                        } else {
-        
-                            // set the results to the variable of productInfo
-                            let productInfo = res[0]
-        
-                            if (quantity <= productInfo.stock_quantity) {
-                                console.log(productInfo.product_name + "is in stock! Placing order now!")
-                                console.log("\n")
-        
-                                // the updating query string
-                                var updateQueryStr = "UPDATE products SET stock_quantity = " + (productInfo.stock_quantity - quantity) + " WHERE item_id = " + item
-                                    // console.log('updateQueryStr = ' + updateQueryStr);
-        
-                                // Update the inventory
-                                connection.query(updateQueryStr, function(err, data) {
-                                    if (err) throw err;
-        
-                                    console.log("Your order has been placed!");
-                                    console.log("Your total is $" + productInfo.price * quantity)
-                                    console.log("\n")
-        
-                                    // End the database connection and close the app
-                                    connection.end();
-                                })
-                            } else {
-                                console.log("Sorry, there is not enough " + productInfo.product_name + " in stock.")
-                                connection.end();
-                            }
-        
-        
-                        }
-                    })
-        
-        
-                })
+                    return choiceArray;
+                },
+                message: "What product would you like to purchase?"
+            },
+            {
+                name: "amount",
+                type: "input",
+                message: "How many would you like to purchase?"
             }
-    
+        ]).then(function(answer) {
+            var chosenProduct;
+            for (var i = 0; i < results.length; i++) {
+                if (results[i].product_name === answer.product) {
+                    chosenProduct = results[i];
+                }
+            }
+
+            if (chosenProduct.stock_quantity > parseInt(answer.amount)) {
+                connection.query("UPDATE products SET ? WHERE ?", [
+                {
+                    stock_quantity: chosenProduct.stock_quantity - parseInt(answer.amount)
+                },
+                {
+                    item_id: chosenProduct.id
+                }], function(error) {
+                    if (error) throw err;
+                    console.log("\n\n");
+                    console.log("==============================================");
+                    console.log("Product purchased successfully!");
+                    console.log("==============================================");
+                    console.log("Purchase Summary");
+                    console.log("-----------------------------");
+                    console.log("Item Name: " +  chosenProduct.product_name);
+                    console.log("Item Count: " + parseInt(answer.amount));
+                    console.log("-----------------------------");
+                    console.log("Total: " + "$" + (chosenProduct.price * parseInt(answer.amount)));
+                    console.log("==============================================");
+                    console.log("\n\n");
+                    display();
+                    run();
+                })
+            } else {
+                console.log("==============================================");
+                console.log("Insufficient stock.");
+                console.log("==============================================");
+                display();
+                run();
+            }
+        });
+    });
+};
+
+run();
 
 
-    
+
+
+
+
+
+
+
+
+
+
+
+
