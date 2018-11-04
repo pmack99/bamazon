@@ -34,3 +34,7 @@ If there is not enough inventory, the app will tell you.
 
 
 ![Image of required files](./images/notENough.png)
+
+After this transaction, the data in the bamazon database is updated to reflect the purchase. 
+
+
