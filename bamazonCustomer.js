@@ -72,14 +72,14 @@ var run = function() {
                     stock_quantity: chosenProduct.stock_quantity - parseInt(answer.amount)
                 },
                 {
-                    item_id: chosenProduct.id
+                    item_id: chosenProduct.itemid
                 }], function(error) {
                     if (error) throw err;
                     console.log("\n\n");
                     console.log("==============================================");
-                    console.log("Product purchased successfully!");
+                    console.log("Product is purchased");
                     console.log("==============================================");
-                    console.log("Purchase Summary");
+                    console.log("Summary");
                     console.log("-----------------------------");
                     console.log("Item Name: " +  chosenProduct.product_name);
                     console.log("Item Count: " + parseInt(answer.amount));
@@ -87,14 +87,14 @@ var run = function() {
                     console.log("Total: " + "$" + (chosenProduct.price * parseInt(answer.amount)));
                     console.log("==============================================");
                     console.log("\n\n");
-                    display();
+                    afterConnection()
                     run();
                 })
             } else {
                 console.log("==============================================");
-                console.log("Insufficient stock.");
+                console.log("Pick a new quantity, not enough in stock");
                 console.log("==============================================");
-                display();
+                afterConnection()
                 run();
             }
         });
