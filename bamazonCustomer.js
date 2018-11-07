@@ -74,7 +74,7 @@ var run = function() {
                     stock_quantity: chosenProduct.stock_quantity - parseInt(answer.amount)
                 },
                 {
-                    item_id: chosenProduct.itemid
+                    item_id: chosenProduct.item_id
                 }], function(error) {
                     if (error) throw err;
                     console.log("\n\n");
